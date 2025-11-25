@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropou
 from tensorflow.keras.optimizers import Adam
 
 #location of the dataset
-data_dir = 'fes2013/'
+data_dir = 'fer2013/'
 
 # Set image size which has been given in the Kaggle discription
 img_size = 48
