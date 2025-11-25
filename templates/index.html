@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Emotion Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <h2>Real-time Facial Emotion Detection</h2>
+
+    <div id="camera-container">
+        <video id="webcam" autoplay playsinline></video>
+        <button id="captureBtn">Capture Image</button>
+    </div>
+
+    <!-- file Upload -->
+     <h3>Or Upload an Image</h3>
+     <input type="file" id ="fileInput">
+
+     <hr>
+
+     <!-- Prediction Output -->
+
+     <h3>Prediction Result</h3>
+     <p> <strong> Emotion: </strong> <span id="emotion"> </span> </p>
+     <p> <strong> Description:</strong> <span id="description"> </span></p>
+
+     <script>
+        // Get the video element for webcam
+        const video = document.getElementById("webcam");
+
+         // Request permission to access the webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => video.srcObject = stream);
+
+    // When Capture button is clicked:
+    document.getElementById("captureBtn").onclick = async () => {
+
+        // Create a canvas to take a snapshot
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw the current video frame into the canvas
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        // Convert canvas image to a Blob object
+        canvas.toBlob(async (blob) => {
+
+            // Create form data to send to backend
+            const formData = new FormData();
+            formData.append("image", blob, "webcam.jpg");
+
+            // Send to Flask API endpoint /predict
+            const response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            // Read returned JSON result
+            const data = await response.json();
+            document.getElementById("emotion").textContent = data.emotion;
+            document.getElementById("description").textContent = data.description;
+        });
+    };
+
+    // When user uploads an image using file picker:
+    document.getElementById("fileInput").onchange = async function () {
+
+        const formData = new FormData();
+        formData.append("image", this.files[0]);
+
+        const response = await fetch("/predict", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+        document.getElementById("emotion").textContent = data.emotion;
+        document.getElementById("description").textContent = data.description;
+    };
+
+     </script>
+    
+</body>
+</html>
